@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "_sidebar.html" %}
+<div class="content-view">
+  <section class="section">
+    <div class="section-head"><h2>Inventario Equipos / IMEI</h2></div>
+    {% if level >= 2 %}
+    <details class="toolbox">
+      <summary>Registrar equipo / IMEI</summary>
+      <form class="grid-form" method="post" action="{{ url_for('equipment_create') }}">
+        <label>IMEI<input name="imei" required></label>
+        <label>Marca y Modelo<input name="modelo" required></label>
+        <label>Gama Celular<select name="gama">{% for x in gamas %}<option>{{ x }}</option>{% endfor %}</select></label>
+        <label>Estado de equipo<select name="estado_equipo">{% for x in equip_states %}<option>{{ x }}</option>{% endfor %}</select></label>
+        <label>Observaciones<input name="observaciones"></label>
+        <button type="submit">Guardar equipo</button>
+      </form>
+    </details>
+    <details class="toolbox">
+      <summary>Importar Excel</summary>
+      <form class="inline-form" method="post" enctype="multipart/form-data" action="{{ url_for('equipment_import') }}">
+        <input type="file" name="archivo" accept=".xlsx" required>
+        <button type="submit">Importar</button>
+      </form>
+    </details>
+    {% endif %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>IMEI</th><th>Marca y Modelo</th><th>Gama</th><th>Estado equipo</th><th>Situacion</th><th>Fecha alta</th><th>Observaciones</th><th></th></tr></thead>
+        <tbody>
+          {% for row in equipment %}
+          <tr>
+            <td>{{ row.imei }}</td><td>{{ row.modelo }}</td><td>{{ row.gama }}</td><td>{{ row.estado_equipo }}</td><td>{{ row.situacion }}</td><td>{{ row.fecha_alta }}</td><td>{{ row.observaciones }}</td>
+            <td>
+              {% if level >= 2 and row.situacion == "Mantenimiento" %}
+              <form class="inline-form" method="post" action="{{ url_for('equipment_rehabilitate', imei=row.imei) }}">
+                <input name="observacion" placeholder="Observacion" required>
+                <button>Rehabilitar</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

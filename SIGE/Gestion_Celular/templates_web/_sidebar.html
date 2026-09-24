@@ -1,0 +1,10 @@
+<aside class="sidebar" aria-label="Vistas">
+  <a class="{{ 'active' if active_view == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}">Dashboard</a>
+  <a class="{{ 'active' if active_view == 'asignaciones' else '' }}" href="{{ url_for('assignments_view') }}">Asignaciones</a>
+  <a class="{{ 'active' if active_view == 'equipos' else '' }}" href="{{ url_for('equipment_view') }}">Inventario Equipos / IMEI</a>
+  <a class="{{ 'active' if active_view == 'historial' else '' }}" href="{{ url_for('history_view') }}">Historial</a>
+  <a class="{{ 'active' if active_view == 'actas' else '' }}" href="{{ url_for('actas_view') }}">Actas de Entrega</a>
+  {% if current_user.role == "Administrador" %}
+  <a class="{{ 'active' if active_view == 'usuarios' else '' }}" href="{{ url_for('users_view') }}">Usuarios</a>
+  {% endif %}
+</aside>

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "_sidebar.html" %}
+<div class="content-view">
+  <section class="section">
+    <div class="section-head">
+      <h2>Asignaciones</h2>
+      <form class="search" method="get" action="{{ url_for('assignments_view') }}">
+        <input name="q" value="{{ q }}" placeholder="Buscar">
+        <button type="submit">Buscar</button>
+      </form>
+    </div>
+
+    {% if level >= 2 %}
+    <details class="toolbox">
+      <summary>Nueva asignacion</summary>
+      <form class="grid-form" method="post" action="{{ url_for('assignment_create') }}">
+        <label>IMEI
+          <input name="imei" list="available-imeis" placeholder="Escriba el IMEI" autocomplete="off" required>
+          <datalist id="available-imeis">
+            {% for item in available %}
+              <option value="{{ item.imei }}">{{ item.modelo }} | {{ item.gama }} | {{ item.estado_equipo }}</option>
+            {% endfor %}
+          </datalist>
+        </label>
+        <label>Operador<select name="operador">{% for x in operadores %}<option>{{ x }}</option>{% endfor %}</select></label>
+        <label>Razon Social<select name="razon_social">{% for x in razones %}<option>{{ x }}</option>{% endfor %}</select></label>
+        <label>Nombre y Apellido<input name="nombre" required></label>
+        <label>Correo<input name="correo" type="email"></label>
+        <label>Cargo<input name="cargo"></label>
+        <label>DNI<input name="dni" required></label>
+        <label>Numero celular<input name="celular"></label>
+        <label>Plan Celular<select name="plan">{% for x in planes %}<option>{{ x }}</option>{% endfor %}</select></label>
+        <label>Tipo de Plan<select name="tipo_plan">{% for x in tipos_plan %}<option>{{ x }}</option>{% endfor %}</select></label>
+        <button type="submit">Guardar asignacion</button>
+      </form>
+    </details>
+    {% endif %}
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Operador</th><th>Razon Social</th><th>Nombre</th><th>Correo</th><th>Cargo</th>
+            <th>DNI</th><th>Celular</th><th>Plan</th><th>Tipo Plan</th><th>Modelo</th><th>Gama</th><th>IMEI</th><th>Situacion</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in assignments %}
+          <tr>
+            <td>{{ row.operador }}</td><td>{{ row.razon_social }}</td><td>{{ row.nombre }}</td><td>{{ row.correo }}</td><td>{{ row.cargo }}</td>
+            <td>{{ row.dni }}</td><td>{{ row.celular }}</td><td>{{ row.plan }}</td><td>{{ row.tipo_plan }}</td><td>{{ row.modelo }}</td><td>{{ row.gama }}</td><td>{{ row.imei }}</td><td>{{ row.situacion }}</td>
+            <td class="actions">
+              {% if level >= 2 %}
+              <form method="post" action="{{ url_for('assignment_acta', imei=row.imei) }}"><button>Acta</button></form>
+              <details class="context-menu action-menu">
+                <summary>Recuperar</summary>
+                <form class="context-form" method="post" action="{{ url_for('assignment_state', imei=row.imei) }}">
+                  <input type="hidden" name="action" value="recuperar">
+                  <input name="observacion" placeholder="Motivo de recuperacion" required>
+                  <button>Confirmar</button>
+                </form>
+              </details>
+              <details class="context-menu action-menu">
+                <summary>Mantenimiento</summary>
+                <form class="context-form" method="post" action="{{ url_for('assignment_state', imei=row.imei) }}">
+                  <input type="hidden" name="action" value="mantenimiento">
+                  <input name="observacion" placeholder="Motivo de mantenimiento" required>
+                  <button>Confirmar</button>
+                </form>
+              </details>
+              <details class="context-menu">
+                <summary>Baja</summary>
+                <div class="context-options">
+                  {% for motivo in ["Robo", "Perdida", "Destruccion"] %}
+                  <form method="post" action="{{ url_for('assignment_state', imei=row.imei) }}">
+                    <input type="hidden" name="action" value="baja">
+                    <input type="hidden" name="observacion" value="{{ motivo }}">
+                    <button class="danger">{{ motivo }}</button>
+                  </form>
+                  {% endfor %}
+                </div>
+              </details>
+              {% endif %}
+              {% if level >= 3 %}
+              <form method="post" action="{{ url_for('assignment_delete', imei=row.imei) }}"><button class="danger">Eliminar</button></form>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="14" class="empty">No hay asignaciones activas.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if level >= 2 %}<a class="download" href="{{ url_for('export') }}">Exportar XLSX</a>{% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "_sidebar.html" %}
+<div class="content-view">
+  <section class="section">
+    <div class="section-head"><h2>Historial</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tipo Movimiento</th><th>Fecha</th><th>Usuario</th><th>IMEI</th><th>Detalle</th></tr></thead>
+        <tbody>{% for row in movements %}<tr><td>{{ row.tipo }}</td><td>{{ row.fecha }}</td><td>{{ row.usuario }}</td><td>{{ row.imei }}</td><td>{{ row.detalle }}</td></tr>{% endfor %}</tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

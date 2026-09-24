@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "_sidebar.html" %}
+<div class="content-view">
+  <section class="section">
+    <div class="section-head"><h2>Dashboard</h2></div>
+    <div class="stats">
+      {% for label, value in counts.items() %}
+        <article class="stat">
+          <span>{{ label }}</span>
+          <strong>{{ value }}</strong>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="charts-grid">
+    <article class="chart-panel">
+      <h3>Movimiento diario de equipos - ultimos 14 dias</h3>
+      <div class="bar-chart" aria-label="Movimiento diario de equipos">
+        {% for item in charts.daily %}
+        <div class="bar-item">
+          <span class="bar-value">{{ item.value if item.value else "" }}</span>
+          <div class="bar-track">
+            <span class="bar" style="height: {{ item.height }}%"></span>
+          </div>
+          <span class="bar-label">{{ item.label }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <span class="chart-caption">Cantidad de movimientos</span>
+    </article>
+
+    <article class="chart-panel">
+      <h3>Movimiento semanal de equipos - ultimas 8 semanas</h3>
+      <div class="bar-chart" aria-label="Movimiento semanal de equipos">
+        {% for item in charts.weekly %}
+        <div class="bar-item">
+          <span class="bar-value">{{ item.value if item.value else "" }}</span>
+          <div class="bar-track">
+            <span class="bar" style="height: {{ item.height }}%"></span>
+          </div>
+          <span class="bar-label">{{ item.label }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <span class="chart-caption">Cantidad de movimientos</span>
+    </article>
+  </section>
+</div>
+{% endblock %}

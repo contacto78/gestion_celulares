@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="login-shell">
+  <form class="login-panel" method="post">
+    <h1>Gestion Corporativa de Celulares</h1>
+    <label>Usuario
+      <input name="usuario" autocomplete="username" required>
+    </label>
+    <label>Clave
+      <input name="clave" type="password" autocomplete="current-password" required>
+    </label>
+    <button type="submit">Ingresar</button>
+  </form>
+</section>
+{% endblock %}

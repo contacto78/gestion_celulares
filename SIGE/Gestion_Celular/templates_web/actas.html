@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "_sidebar.html" %}
+<div class="content-view">
+  <section class="section">
+    <div class="section-head"><h2>Actas de Entrega</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>{% for h in ["Fecha","Usuario","Nombre","DNI","Fecha de Entrega","Nombre del documento generado"] %}<th>{{ h }}</th>{% endfor %}<th></th></tr></thead>
+        <tbody>
+          {% for row in actas %}
+          <tr>
+            <td>{{ row["Fecha"] }}</td><td>{{ row["Usuario"] }}</td><td>{{ row["Nombre"] }}</td><td>{{ row["DNI"] }}</td><td>{{ row["Fecha de Entrega"] }}</td><td>{{ row["Nombre del documento generado"] }}</td>
+            <td>{% if row["Nombre del documento generado"] %}<a href="{{ url_for('acta_download', filename=row['Nombre del documento generado']) }}">Abrir</a>{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}
