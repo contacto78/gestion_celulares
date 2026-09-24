@@ -149,6 +149,7 @@ def ensure_actas_entrega_schema():
     wb = load_workbook(EXCEL)
     ensure_sheet(wb, "Actas de Entrega", ACTAS_ENTREGA_HEADERS)
     ensure_sheet(wb, "Actas", ["ID Acta", "ID Equipo", "Tipo", "Nombre", "DNI", "Fecha", "Archivo PDF"])
+    ensure_sheet(wb, "Actas PDF", ["Nombre del documento generado", "Contenido Base64"])
     wb.save(EXCEL)
 
 
@@ -213,6 +214,40 @@ def log(user, eq, typ, detail, imei=None):
     n = max([int_or_zero(row[0].value) for row in ws.iter_rows(min_row=2)], default=0) + 1
     ws.append([n, eq, typ, now(), user, imei, detail])
     wb.save(EXCEL)
+
+
+def save_pdf_backup(filename: str, pdf_path: Path):
+    if not pdf_path.exists():
+        return
+    import base64
+
+    wb = book()
+    ws = ensure_sheet(wb, "Actas PDF", ["Nombre del documento generado", "Contenido Base64"])
+    encoded = base64.b64encode(pdf_path.read_bytes()).decode("ascii")
+    for row in ws.iter_rows(min_row=2):
+        if clean(row[0].value) == filename:
+            row[1].value = encoded
+            wb.save(EXCEL)
+            return
+    ws.append([filename, encoded])
+    wb.save(EXCEL)
+
+
+def restore_pdf_from_backup(filename: str) -> Path | None:
+    import base64
+
+    if not EXCEL.exists():
+        return None
+    wb = book()
+    if "Actas PDF" not in wb.sheetnames:
+        return None
+    for row in wb["Actas PDF"].iter_rows(min_row=2, values_only=True):
+        if clean(row[0]) == filename and clean(row[1]):
+            path = ACTAS / filename
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(base64.b64decode(clean(row[1])))
+            return path
+    return None
 
 
 def prepare_database():
@@ -994,6 +1029,7 @@ def generate_acta_pdf(imei: str, user: str) -> Path:
         ws.append(ACTAS_ENTREGA_HEADERS)
     wb["Actas de Entrega"].append([fecha_generacion, user, nombre, dni, fecha_entrega, pdf.name])
     wb.save(EXCEL)
+    save_pdf_backup(pdf.name, pdf)
     return pdf
 
     # Flujo historico local con Microsoft Word. Se conserva como referencia, pero
@@ -1270,8 +1306,12 @@ def acta_download(filename):
     safe = Path(filename).name
     path = ACTAS / safe
     if not path.exists():
+        restored = restore_pdf_from_backup(safe)
+        if restored and restored.exists():
+            path = restored
+    if not path.exists():
         flash("No se encontro el PDF solicitado.", "error")
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("actas_view"))
     return send_file(path, as_attachment=False)
 
 
